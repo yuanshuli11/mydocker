@@ -1,6 +1,7 @@
 package container
 
 import (
+	"fmt"
 	"os"
 	"syscall"
 
@@ -21,6 +22,7 @@ func RunContainerInitProcess(command string, args []string) error {
 	syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), "")
 
 	argv := []string{command}
+	fmt.Println("===", command, argv, os.Environ())
 	if err := syscall.Exec(command, argv, os.Environ()); err != nil {
 		logrus.Errorf(err.Error())
 	}
