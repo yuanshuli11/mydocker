@@ -11,21 +11,16 @@ import (
 type MemorySubSystem struct{}
 
 func (s *MemorySubSystem) Set(cgrouPath string, res *ResourceConfig) error {
-
 	if subsysCgroupath, err := GetCgroupPath(s.Name(), cgrouPath, true); err == nil {
 		if res.MemoryLimit != "" {
 			if err := ioutil.WriteFile(path.Join(subsysCgroupath, "memory.limit_in_bytes"), []byte(res.MemoryLimit), 0644); err != nil {
 				return fmt.Errorf("set cgroup memory fail %v", err)
 			}
-			return nil
-		} else {
-			return fmt.Errorf("get cgroup %s error %v", cgrouPath, err)
 		}
-
-	} else {
 		return nil
+	} else {
+		return err
 	}
-
 }
 
 func (s *MemorySubSystem) Remove(cgroupPath string) error {
