@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"mydocker/utils"
 	"os"
 
 	log "github.com/sirupsen/logrus"
@@ -17,8 +18,8 @@ func main() {
 	app.Name = "mydocker"
 	app.Usage = usage
 	app.Commands = []cli.Command{
-		initCommand,
-		runCommand,
+		utils.InitCommand,
+		utils.RunCommand,
 	}
 
 	app.Before = func(context *cli.Context) error {

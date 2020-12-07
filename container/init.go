@@ -9,37 +9,33 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 )
 
-func setUpMount() {
-	pwd, err := os.Getwd()
-	if err != nil {
-		log.Errorf("Get current location error %v", err)
-		return
-	}
-
-	log.Infof("Current location is %s", pwd)
-	pivotRoot(pwd)
-	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
-	syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), "")
-
-	syscall.Mount("tmpfs", "/dev", "tmpfs", syscall.MS_NOSUID|syscall.MS_STRICTATIME, "mode=755")
-}
-
-func RunContainerInitProcess() error {
-
+//
+//func setUpMount() {
+//	pwd, err := os.Getwd()
+//	if err != nil {
+//		log.Errorf("Get current location error %v", err)
+//		return
+//	}
+//
+//	log.Infof("Current location is %s", pwd)
+//	pivotRoot(pwd)
+//	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
+//	syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), "")
+//
+//	syscall.Mount("tmpfs", "/dev", "tmpfs", syscall.MS_NOSUID|syscall.MS_STRICTATIME, "mode=755")
+//}
+//
+func RunContainerInitProcess(command string, args []string) error {
 	cmdArray := readUserCommand()
 	if cmdArray == nil || len(cmdArray) == 0 {
-		return fmt.Errorf("Run container get user command error,cmdArray is nil")
+		return fmt.Errorf("Run container get user command error, cmdArray is nil")
 	}
 
-	setUpMount()
+	//setUpMount()
 
-	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
-
-	syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), "")
 	path, err := exec.LookPath(cmdArray[0])
 	if err != nil {
 		log.Errorf("Exec loop path error %v", err)
@@ -47,7 +43,7 @@ func RunContainerInitProcess() error {
 	}
 	log.Infof("Find path %s", path)
 	if err := syscall.Exec(path, cmdArray[0:], os.Environ()); err != nil {
-		logrus.Errorf(err.Error())
+		log.Errorf(err.Error())
 	}
 	return nil
 }

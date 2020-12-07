@@ -14,23 +14,26 @@ func NewWorkSpace(rootURL string, mntURL string) {
 	CreateMountPoint(rootURL, mntURL)
 }
 
-func CreateReadOnlyLayer(rootURL string) {
+func CreateReadOnlyLayer(rootURL string) error {
 	busyboxURL := rootURL + "busybox/"
 	busyboxTarURL := rootURL + "busybox.tar"
 	exist, err := PathExists(busyboxURL)
 
 	if err != nil {
 		log.Infof("Fail to judge whether dir %s exists. %v", busyboxURL, err)
+		return err
 	}
-	if exist == false {
+	if !exist {
 		if err := os.Mkdir(busyboxURL, 0777); err != nil {
 			log.Errorf("Mkdir dir %s error.%v", busyboxTarURL, err)
+			return err
 		}
 		if _, err := exec.Command("tar", "-xvf", busyboxTarURL, "-C", busyboxTarURL).CombinedOutput(); err != nil {
 			log.Errorf("unTar dir %s error %v", busyboxTarURL, err)
+			return err
 		}
 	}
-
+	return err
 }
 
 func CreateWriteLayer(rootURL string) {
@@ -97,8 +100,8 @@ func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
 	}
 	cmd := exec.Command("/proc/self/exe", "init")
 	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWIPC | syscall.CLONE_NEWPID |
-			syscall.CLONE_NEWNS | syscall.CLONE_NEWNET,
+		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS |
+			syscall.CLONE_NEWNET | syscall.CLONE_NEWIPC,
 	}
 	if tty {
 		cmd.Stdin = os.Stdin
@@ -106,10 +109,6 @@ func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
 		cmd.Stderr = os.Stderr
 	}
 	cmd.ExtraFiles = []*os.File{readPipe}
-	mntURL := "/root/mnt/"
-	rootURL := "/root/"
-	NewWorkSpace(rootURL, mntURL)
-	cmd.Dir = mntURL
 	return cmd, writePipe
 }
 
