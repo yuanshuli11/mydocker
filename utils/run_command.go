@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"mydocker/cgroups/subsystems"
 	"mydocker/container"
-	"syscall"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -32,7 +31,6 @@ var RunCommand = cli.Command{
 		},
 	},
 	Action: func(context *cli.Context) error {
-		fmt.Println("=====", context.Args())
 		if len(context.Args()) < 1 {
 			return fmt.Errorf("Missing container command")
 		}
@@ -43,10 +41,9 @@ var RunCommand = cli.Command{
 		}
 		tty := context.Bool("ti")
 
-		fmt.Println("====ddd", context.String("m"), tty)
 		//这一行是我自己加的
-		defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
-		syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), "")
+		//		defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
+		//		syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), "")
 
 		resConf := &subsystems.ResourceConfig{
 			MemoryLimit: context.String("m"),

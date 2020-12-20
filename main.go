@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"mydocker/utils"
 	"os"
 
@@ -27,7 +26,6 @@ func main() {
 		log.SetOutput(os.Stdout)
 		return nil
 	}
-	fmt.Println("main args:", os.Args)
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
