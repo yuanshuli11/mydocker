@@ -17,6 +17,10 @@ var RunCommand = cli.Command{
 			Name:  "ti",
 			Usage: "enable tty",
 		},
+		cli.BoolFlag{
+			Name:  "d",
+			Usage: "detach container",
+		},
 		cli.StringFlag{
 			Name:  "m",
 			Usage: "memory limit",
@@ -29,6 +33,14 @@ var RunCommand = cli.Command{
 			Name:  "cpuset",
 			Usage: "cpuset limit",
 		},
+		cli.StringFlag{
+			Name:  "v",
+			Usage: "volume",
+		},
+		cli.StringFlag{
+			Name:  "name",
+			Usage: "container name",
+		},
 	},
 	Action: func(context *cli.Context) error {
 		if len(context.Args()) < 1 {
@@ -39,18 +51,23 @@ var RunCommand = cli.Command{
 		for _, arg := range context.Args() {
 			cmdArray = append(cmdArray, arg)
 		}
-		tty := context.Bool("ti")
+		detach := context.Bool("d")
 
-		//这一行是我自己加的
-		//		defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
-		//		syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), "")
+		createTty := context.Bool("ti")
 
+		if createTty && detach {
+			return fmt.Errorf("ti and d paramter can not both provided")
+		}
 		resConf := &subsystems.ResourceConfig{
 			MemoryLimit: context.String("m"),
 			CpuSet:      context.String("cpuset"),
 			CpuShare:    context.String("cpushare"),
 		}
-		Run(tty, cmdArray, resConf)
+		//volume := context.String("v")
+		log.Infof("createTty %v", createTty)
+		containerName := context.String("name")
+
+		Run(createTty, cmdArray, resConf, containerName)
 		return nil
 	},
 }
@@ -67,5 +84,19 @@ var InitCommand = cli.Command{
 			log.Infof("err:%v", err)
 		}
 		return err
+	},
+}
+
+var CommitCommand = cli.Command{
+	Name:  "commit",
+	Usage: "commit a container into image",
+	Action: func(context *cli.Context) error {
+		if len(context.Args()) < 1 {
+			return fmt.Errorf("Missing container name")
+		}
+		imageName := context.Args().Get(0)
+		//commitContainer(containerName)
+		commitContainer(imageName)
+		return nil
 	},
 }

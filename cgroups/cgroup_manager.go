@@ -30,7 +30,7 @@ func (c *CgroupManager) Set(res *subsystems.ResourceConfig) error {
 	return nil
 }
 
-func (c *CgroupManager) Destory() error {
+func (c *CgroupManager) Destroy() error {
 	for _, subSysInts := range subsystems.SubSystemsIns {
 		if err := subSysInts.Remove(c.Path); err != nil {
 			logrus.Warnf("remove cgroup fail %v", err)
